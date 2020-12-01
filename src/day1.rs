@@ -1,6 +1,7 @@
 use std::collections::HashSet;
 use std::fs::File;
-use std::io::{BufReader, Read};
+use std::io::prelude::*;
+use std::io::BufReader;
 use std::iter::FromIterator;
 use std::str::FromStr;
 
@@ -9,11 +10,11 @@ use std::str::FromStr;
 
 fn read_file_as_map() -> HashSet<u32> {
     let file = File::open("input/day1.txt").unwrap();
-    let mut reader = BufReader::new(file);
-    let mut string = String::new();
-    reader.read_to_string(&mut string).unwrap();
-
-    HashSet::from_iter(string.lines().map(|line| u32::from_str(line).unwrap()))
+    HashSet::from_iter(
+        BufReader::new(file)
+            .lines()
+            .map(|line| u32::from_str(line.unwrap().as_str()).unwrap()),
+    )
 }
 
 fn find_pair_with_sum(input: &HashSet<u32>, sum: u32) -> Option<(u32, u32)> {
