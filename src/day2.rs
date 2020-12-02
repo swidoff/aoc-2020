@@ -2,7 +2,6 @@ use itertools::Itertools;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufReader;
-use std::iter::FromIterator;
 use std::str::FromStr;
 
 #[derive(Debug)]
@@ -20,13 +19,8 @@ impl PasswordRecord {
     }
 
     fn is_valid_part2(&self) -> bool {
-        let c1 = self.char_at(self.min - 1);
-        let c2 = self.char_at(self.max - 1);
-        (c1 == self.letter) ^ (c2 == self.letter)
-    }
-
-    fn char_at(&self, index: usize) -> char {
-        (&self.password[index..]).chars().nth(0).unwrap()
+        let slice = &self.password[(self.min - 1)..self.max];
+        slice.starts_with(self.letter) ^ slice.ends_with(self.letter)
     }
 }
 
@@ -37,17 +31,21 @@ fn read_password_database() -> Vec<PasswordRecord> {
         .map(|line| line.unwrap())
         .map(|line| {
             let mut parts = line.split_whitespace();
-            let min_max_part = parts.next().unwrap();
-            let letter_part = parts.next().unwrap();
-            let password = parts.next().unwrap();
-            let (min_count_str, max_count_str) =
-                min_max_part.split_at(min_max_part.find("-").unwrap());
+            let (min, max) = parts
+                .next()
+                .unwrap()
+                .split("-")
+                .map(|s| usize::from_str(s).unwrap())
+                .collect_tuple()
+                .unwrap();
+            let letter = parts.next().unwrap().chars().nth(0).unwrap();
+            let password = parts.next().unwrap().to_string();
 
             PasswordRecord {
-                min: usize::from_str(min_count_str).unwrap(),
-                max: usize::from_str(&max_count_str[1..]).unwrap(),
-                letter: letter_part.chars().next().unwrap(),
-                password: password.to_string(),
+                min,
+                max,
+                letter,
+                password,
             }
         })
         .collect_vec()
