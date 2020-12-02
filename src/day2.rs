@@ -24,31 +24,28 @@ impl PasswordRecord {
     }
 }
 
-fn read_password_database() -> Vec<PasswordRecord> {
+fn read_password_database() -> impl Iterator<Item = PasswordRecord> {
     let file = File::open("input/day2.txt").unwrap();
-    BufReader::new(file)
-        .lines()
-        .map(|line| line.unwrap())
-        .map(|line| {
-            let mut parts = line.split_whitespace();
-            let (min, max) = parts
-                .next()
-                .unwrap()
-                .split("-")
-                .map(|s| usize::from_str(s).unwrap())
-                .collect_tuple()
-                .unwrap();
-            let letter = parts.next().unwrap().chars().nth(0).unwrap();
-            let password = parts.next().unwrap().to_string();
+    BufReader::new(file).lines().map(|line_res| {
+        let line = line_res.unwrap();
+        let mut parts = line.split_whitespace();
+        let (min, max) = parts
+            .next()
+            .unwrap()
+            .split("-")
+            .map(|s| usize::from_str(s).unwrap())
+            .collect_tuple()
+            .unwrap();
+        let letter = parts.next().unwrap().chars().nth(0).unwrap();
+        let password = parts.next().unwrap().to_string();
 
-            PasswordRecord {
-                min,
-                max,
-                letter,
-                password,
-            }
-        })
-        .collect_vec()
+        PasswordRecord {
+            min,
+            max,
+            letter,
+            password,
+        }
+    })
 }
 
 #[cfg(test)]
@@ -58,14 +55,14 @@ mod tests {
     #[test]
     fn part1() {
         let db = read_password_database();
-        let valid_count = db.iter().filter(|r| r.is_valid_part1()).count();
+        let valid_count = db.filter(|r| r.is_valid_part1()).count();
         println!("{}", valid_count);
     }
 
     #[test]
     fn part2() {
         let db = read_password_database();
-        let valid_count = db.iter().filter(|r| r.is_valid_part2()).count();
+        let valid_count = db.filter(|r| r.is_valid_part2()).count();
         println!("{}", valid_count);
     }
 }
