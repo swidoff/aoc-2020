@@ -8,7 +8,7 @@ use std::str::FromStr;
 /// Assuming file does not contain duplicates (mine does not)
 /// Assuming the sum does not pair (or triple) a number with itself (1010 is not in the file)
 
-fn read_file_as_map() -> HashSet<u32> {
+fn read_file_as_set() -> HashSet<u32> {
     let file = File::open("input/day1.txt").unwrap();
     HashSet::from_iter(
         BufReader::new(file)
@@ -33,11 +33,11 @@ fn find_triple_with_sum(input: &HashSet<u32>, sum: u32) -> Option<(u32, u32, u32
 
 #[cfg(test)]
 mod tests {
-    use crate::day1::{find_pair_with_sum, find_triple_with_sum, read_file_as_map};
+    use crate::day1::{find_pair_with_sum, find_triple_with_sum, read_file_as_set};
 
     #[test]
     fn part1() {
-        let input = read_file_as_map();
+        let input = read_file_as_set();
         match find_pair_with_sum(&input, 2020) {
             Some((v1, v2)) => println!("{}", v1 * v2),
             None => println!("No solution found"),
@@ -46,7 +46,7 @@ mod tests {
 
     #[test]
     fn part2() {
-        let input = read_file_as_map();
+        let input = read_file_as_set();
         match find_triple_with_sum(&input, 2020) {
             Some((v1, v2, v3)) => println!("{}", v1 * v2 * v3),
             None => println!("No solution found"),
