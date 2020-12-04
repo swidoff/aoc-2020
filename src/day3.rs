@@ -1,7 +1,6 @@
 use itertools::Itertools;
 use std::fs::File;
 use std::io::prelude::*;
-use std::iter::FromIterator;
 
 fn read_grid() -> Vec<Vec<char>> {
     let mut file = File::open("input/day3.txt").unwrap();
@@ -16,11 +15,11 @@ fn read_grid_from_string(str: &String) -> Vec<Vec<char>> {
         .collect_vec()
 }
 
-fn print_grid(grid: &Vec<Vec<char>>) {
-    for line in grid {
-        println!("{}", String::from_iter(line.iter()));
-    }
-}
+// fn print_grid(grid: &Vec<Vec<char>>) {
+//     for line in grid {
+//         println!("{}", String::from_iter(line.iter()));
+//     }
+// }
 
 fn count_trees_on_path(grid: &Vec<Vec<char>>, x_velocity: usize, y_velocity: usize) -> u64 {
     let (count, _) = grid

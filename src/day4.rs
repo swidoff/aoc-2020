@@ -2,25 +2,37 @@ use itertools::Itertools;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::prelude::*;
-use std::iter::FromIterator;
 use std::str::FromStr;
+
+const EYE_COLORS: [&str; 7] = ["amb", "blu", "brn", "grn", "gry", "hzl", "oth"];
+
+fn read_passports() -> Vec<Passport> {
+    let mut file = File::open("input/day4.txt").unwrap();
+    let mut str = String::new();
+    file.read_to_string(&mut str).unwrap();
+    read_passports_from_string(&str)
+}
+
+fn read_passports_from_string(str: &String) -> Vec<Passport> {
+    let vec = vec![Passport::new()];
+    str.lines()
+        .flat_map(|line| line.split(" ").into_iter())
+        .fold(vec, |mut acc, input| {
+            if input.is_empty() {
+                acc.push(Passport::new())
+            } else if let Some((key, value)) = input.split(":").collect_tuple() {
+                if let Some(passport) = acc.last_mut() {
+                    passport.fields.insert(key.to_string(), value.to_string());
+                }
+            }
+            acc
+        })
+}
 
 #[derive(Debug)]
 struct Passport {
     fields: HashMap<String, String>,
 }
-
-fn is_valid_number(value: &str, min: u16, max: u16) -> bool {
-    u16::from_str(value)
-        .map(|v| v >= min && v <= max)
-        .unwrap_or(false)
-}
-
-fn is_valid_hex_number(value: &str) -> bool {
-    u64::from_str_radix(value, 16).is_ok()
-}
-
-const EYE_COLORS: [&str; 7] = ["amb", "blu", "brn", "grn", "gry", "hzl", "oth"];
 
 impl Passport {
     fn new() -> Passport {
@@ -41,10 +53,10 @@ impl Passport {
     fn all_fields_valid(&self) -> bool {
         self.fields
             .iter()
-            .all(|(field, value)| Passport::is_field_valid(field, value))
+            .all(|(field, value)| Passport::is_valid_field(field, value))
     }
 
-    fn is_field_valid(field: &String, value: &String) -> bool {
+    fn is_valid_field(field: &String, value: &String) -> bool {
         match field.as_str() {
             "byr" => is_valid_number(value, 1920, 2002),
             "iyr" => is_valid_number(value, 2010, 2020),
@@ -60,29 +72,14 @@ impl Passport {
     }
 }
 
-fn read_passports() -> Vec<Passport> {
-    let mut file = File::open("input/day4.txt").unwrap();
-    let mut str = String::new();
-    file.read_to_string(&mut str).unwrap();
-    read_passports_from_string(&str)
+fn is_valid_number(value: &str, min: u16, max: u16) -> bool {
+    u16::from_str(value)
+        .map(|v| v >= min && v <= max)
+        .unwrap_or(false)
 }
 
-fn read_passports_from_string(str: &String) -> Vec<Passport> {
-    let vec = vec![Passport::new()];
-    str.lines()
-        .flat_map(|line| line.split(" ").into_iter())
-        .fold(vec, |mut acc, input| {
-            if input.is_empty() {
-                acc.push(Passport::new())
-            } else {
-                let mut pair = input.split(":");
-                let key = pair.next().unwrap();
-                let value = pair.next().unwrap();
-                let passport = acc.last_mut().unwrap();
-                passport.fields.insert(key.to_string(), value.to_string());
-            }
-            acc
-        })
+fn is_valid_hex_number(value: &str) -> bool {
+    u64::from_str_radix(value, 16).is_ok()
 }
 
 #[cfg(test)]
@@ -109,6 +106,7 @@ iyr:2011 ecl:brn hgt:59in
         let passports = read_passports_from_string(&EXAMPLE_PART1[1..].to_string());
         let count = passports.iter().filter(|p| (*p).is_valid()).count();
         println!("{}", count);
+        assert_eq!(count, 2);
     }
 
     #[test]
@@ -119,6 +117,7 @@ iyr:2011 ecl:brn hgt:59in
             .filter(|p| (*p).is_valid_number_of_fields())
             .count();
         println!("{}", count);
+        assert_eq!(count, 200);
     }
 
     const EXAMPLE_PART2_INVALID: &str = "
@@ -142,6 +141,7 @@ pid:3556412378 byr:2007
         let passports = read_passports_from_string(&EXAMPLE_PART2_INVALID[1..].to_string());
         let count = passports.iter().filter(|p| (*p).is_valid()).count();
         println!("{}", count);
+        assert_eq!(count, 0);
     }
 
     const EXAMPLE_PART2_VALID: &str = "
@@ -164,6 +164,7 @@ iyr:2010 hgt:158cm hcl:#b6652a ecl:blu byr:1944 eyr:2021 pid:093154719
         let passports = read_passports_from_string(&EXAMPLE_PART2_VALID[1..].to_string());
         let count = passports.iter().filter(|p| (*p).is_valid()).count();
         println!("{}", count);
+        assert_eq!(count, 4);
     }
 
     #[test]
@@ -171,5 +172,6 @@ iyr:2010 hgt:158cm hcl:#b6652a ecl:blu byr:1944 eyr:2021 pid:093154719
         let passports = read_passports();
         let count = passports.iter().filter(|p| (*p).is_valid()).count();
         println!("{}", count);
+        assert_eq!(count, 116);
     }
 }
