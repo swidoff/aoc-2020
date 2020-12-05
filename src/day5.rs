@@ -3,6 +3,10 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufReader;
 
+///
+///  Initial version - Literally translates algorithm in the problem description.
+///
+
 fn read_file() -> Vec<String> {
     let file = File::open("input/day5.txt").unwrap();
     BufReader::new(file)
@@ -13,12 +17,12 @@ fn read_file() -> Vec<String> {
 
 #[derive(Debug)]
 struct BoardingPass {
-    row: u32,
-    column: u32,
+    row: u16,
+    column: u16,
 }
 
 impl BoardingPass {
-    fn seat(&self) -> u32 {
+    fn seat(&self) -> u16 {
         self.row * 8 + self.column
     }
 }
@@ -30,7 +34,7 @@ fn decode_pass(pass: &String) -> BoardingPass {
     BoardingPass { row, column }
 }
 
-fn locate_position(positions: u32, codes: &str, lower_code: char) -> u32 {
+fn locate_position(positions: u16, codes: &str, lower_code: char) -> u16 {
     let mut min = 0;
     let mut max = positions;
     let (first_codes, last_code) = codes.split_at(codes.len() - 1);
@@ -51,9 +55,28 @@ fn locate_position(positions: u32, codes: &str, lower_code: char) -> u32 {
     }
 }
 
+///
+/// After the fact version. Maps letters directly to binary digits and lines to binary numbers.
+///
+/// Works entirely on iterators, but I believe the `lines` operator still does some dynamic memory allocation to
+/// create the `String` objects it returns.
+///
+
+fn read_file_v2() -> impl Iterator<Item = u16> {
+    let file = File::open("input/day5.txt").unwrap();
+    BufReader::new(file)
+        .lines()
+        .map(|line| line_to_seat(&mut line.unwrap().chars()))
+}
+
+fn line_to_seat(line: &mut impl Iterator<Item = char>) -> u16 {
+    line.map(|c| if c == 'F' || c == 'L' { 0 } else { 1 })
+        .fold(0, |acc, bit| (acc << 1) | bit)
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::day5::{decode_pass, read_file};
+    use crate::day5::{decode_pass, line_to_seat, read_file, read_file_v2};
     use itertools::Itertools;
 
     #[test]
@@ -65,9 +88,23 @@ mod tests {
     }
 
     #[test]
+    fn part1_example_v2() {
+        assert_eq!(line_to_seat(&mut "FBFBBFFRLR".chars()), 357);
+        assert_eq!(line_to_seat(&mut "BFFFBBFRRR".chars()), 567);
+        assert_eq!(line_to_seat(&mut "FFFBBBFRRR".chars()), 119);
+        assert_eq!(line_to_seat(&mut "BBFFBBFRLL".chars()), 820);
+    }
+
+    #[test]
     fn part1() {
         let passes = read_file();
         let res = passes.iter().map(|l| decode_pass(l).seat()).max();
+        println!("{}", res.unwrap());
+    }
+
+    #[test]
+    fn part1_v2() {
+        let res = read_file_v2().max();
         println!("{}", res.unwrap());
     }
 
