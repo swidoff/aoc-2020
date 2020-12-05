@@ -1,12 +1,14 @@
 use itertools::Itertools;
 use std::fs::File;
 use std::io::prelude::*;
+use std::io::BufReader;
 
 fn read_file() -> Vec<String> {
-    let mut file = File::open("input/day5.txt").unwrap();
-    let mut str = String::new();
-    file.read_to_string(&mut str).unwrap();
-    str.lines().map(|line| line.to_string()).collect_vec()
+    let file = File::open("input/day5.txt").unwrap();
+    BufReader::new(file)
+        .lines()
+        .map(|line| line.unwrap().to_string())
+        .collect_vec()
 }
 
 #[derive(Debug)]
@@ -33,8 +35,9 @@ fn locate_position(positions: u32, codes: &str, lower_code: char) -> u32 {
     let mut max = positions;
     let (first_codes, last_code) = codes.split_at(codes.len() - 1);
 
+    let mut increment = positions;
     for c in first_codes.chars() {
-        let increment = (max - min) / 2;
+        increment >>= 1;
         if c == lower_code {
             max -= increment;
         } else {
@@ -92,7 +95,7 @@ mod tests {
             println!(" {}", row);
         }
 
-        // Actual computation method.
+        // Computation method.
 
         let res = missing
             .iter()
