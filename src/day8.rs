@@ -1,10 +1,8 @@
-use crate::day8::Instruction::ACC;
 use itertools::Itertools;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufReader;
-use std::iter::FromIterator;
 use std::str::FromStr;
 
 fn read_file() -> impl Iterator<Item = String> {
@@ -67,7 +65,7 @@ fn run_code(program: &Vec<Instruction>) -> Result<i32, i32> {
     Result::Ok(acc)
 }
 
-fn break_infinite_loop(program: &mut Vec<Instruction>) -> Option<i32> {
+fn break_infinite_loop(program: &mut Vec<Instruction>) -> Option<(usize, i32)> {
     let candidates = program
         .iter()
         .enumerate()
@@ -89,7 +87,7 @@ fn break_infinite_loop(program: &mut Vec<Instruction>) -> Option<i32> {
         let old_instruction = program.swap_remove(*index);
 
         match run_code(&program) {
-            Ok(acc) => Some(acc),
+            Ok(acc) => Some((*index, acc)),
             Err(_) => {
                 // Restore candidate.
                 program.push(old_instruction);
@@ -103,7 +101,6 @@ fn break_infinite_loop(program: &mut Vec<Instruction>) -> Option<i32> {
 #[cfg(test)]
 mod tests {
     use crate::day8::{break_infinite_loop, parse_instructions, read_file, run_code};
-    use std::collections::HashSet;
 
     const EXAMPLE1: &str = "
 nop +0
@@ -136,14 +133,17 @@ acc +6
     fn part2_example() {
         let mut instructions =
             parse_instructions(EXAMPLE1[1..].to_string().lines().map(|s| s.to_string()));
-        let res = break_infinite_loop(&mut instructions);
-        assert_eq!(res, Some(8));
+        let (index, acc) = break_infinite_loop(&mut instructions).unwrap();
+        println!("{}", index);
+        assert_eq!(acc, 8);
     }
 
     #[test]
     fn part2() {
         let mut instructions = parse_instructions(read_file());
-        let res = break_infinite_loop(&mut instructions);
-        println!("{}", res.unwrap());
+        let (index, acc) = break_infinite_loop(&mut instructions).unwrap();
+        println!("{}", acc);
+        println!("{}", index);
+        assert_eq!(acc, 1121);
     }
 }
