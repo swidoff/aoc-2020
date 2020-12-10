@@ -13,9 +13,13 @@ fn read_file() -> impl Iterator<Item = u64> {
 }
 
 fn joltage_distribution(adapters: &mut Vec<u64>) -> (u64, u64) {
+    // Include zero and your final adapter.
     adapters.push(0);
     adapters.push(adapters.iter().max().unwrap() + 3);
     adapters.sort();
+
+    // Since we know the distance is never greater than three, just count the distances between
+    // adjacent adapters.
     adapters
         .iter()
         .tuple_windows()
@@ -28,13 +32,14 @@ fn joltage_distribution(adapters: &mut Vec<u64>) -> (u64, u64) {
 }
 
 fn count_arrangements(adapters: &mut Vec<u64>) -> u64 {
-    // Ok, you really only need up to three counts, but there are only 100 rows in the file.
+    // Include zero and your final adapter.
     adapters.push(0);
     adapters.push(adapters.iter().max().unwrap() + 3);
     adapters.sort();
 
     // Use bottom-up dynamic programming to avoid recalculating overlapping sub-problems.
     // Sum the counts including and excluding each previous adapter within a distance of 3.
+    // You really only need up to three counts, but there are only 100 rows in the file.
     let mut counts: Vec<u64> = Vec::with_capacity(adapters.len());
     counts.push(1);
     for i in 1..adapters.len() {
