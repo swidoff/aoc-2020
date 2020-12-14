@@ -76,7 +76,7 @@ fn process_instructions(instructions: &Vec<Instruction>) -> u64 {
             Instruction::Mask {
                 ones,
                 zeroes,
-                x_indexes,
+                x_indexes: _x_indexes,
             } => {
                 ones_mask = *ones;
                 zeroes_mask = *zeroes;
@@ -110,7 +110,7 @@ fn process_instructions_v2(instructions: &Vec<Instruction>) -> u64 {
                 x_indexes_mask.replace(x_indexes);
             }
             Instruction::Mem { address, value } => {
-                let base_address = (address | ones_mask);
+                let base_address = address | ones_mask;
                 for final_address in enumerate_addresses(base_address, x_indexes_mask.unwrap()) {
                     mem.insert(final_address, *value);
                 }
