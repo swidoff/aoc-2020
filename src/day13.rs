@@ -59,35 +59,19 @@ fn parse_line_part2(line: &String) -> Vec<(u64, u64)> {
         .collect_vec()
 }
 
-/// Merge each bus with the next so the new bus has the combined departure time and bus number (period).
-/// You can merge when the buses arrive with the correct offset twice.
-/// The first time they meet is the new departure; the second time is the new bus number;
 fn solve_contest(inputs: &Vec<(u64, u64)>) -> u64 {
-    let mut departure_time = 0;
-    let mut bus_number = inputs[0].1;
-    for (i, (next_departure_time, next_bus_number)) in inputs.iter().enumerate().skip(1) {
-        let mut t = departure_time;
-        let mut new_departure_time = None;
-        let mut new_bus_number = 0;
-
-        while new_bus_number == 0 {
-            t += bus_number;
-
-            if (t + next_departure_time) % next_bus_number == 0 {
-                if i == inputs.len() - 1 {
-                    new_bus_number = t;
-                } else if let Some(dep_time) = new_departure_time {
-                    new_bus_number = t - dep_time;
-                    departure_time = dep_time;
-                } else {
-                    new_departure_time = Some(t);
-                }
+    let mut t = 1;
+    let mut period = 1;
+    for (departure_time, bus_number) in inputs.iter() {
+        loop {
+            if (t + departure_time) % bus_number == 0 {
+                period *= bus_number;
+                break;
             }
+            t += period
         }
-
-        bus_number = new_bus_number;
     }
-    bus_number
+    t
 }
 
 #[cfg(test)]
