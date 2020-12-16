@@ -98,6 +98,7 @@ fn assign_fields(notes: &Notes) -> Vec<&String> {
     // For each ticket index, find candidate fields. Multiple fields can be candidates.
     let mut candidates: Vec<HashSet<&String>> = (0..notes.fields.len())
         .map(|field_index| {
+            // Find field names for which all tickets are valid for the values at the field index.
             let field_names =
                 notes
                     .fields
