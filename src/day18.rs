@@ -46,7 +46,7 @@ enum Node {
 
 fn expression_part1(tokens: &mut VecDeque<Token>) -> Box<Node> {
     let mut res = factor_part1(tokens);
-    while let Some(Token::Op(op)) = tokens.front_mut() {
+    while let Some(Token::Op(op)) = tokens.front() {
         let op = op.clone();
         tokens.pop_front();
         res = Box::new(Node::Expr(res, op, factor_part1(tokens)));
@@ -56,7 +56,7 @@ fn expression_part1(tokens: &mut VecDeque<Token>) -> Box<Node> {
 
 fn expression_part2(tokens: &mut VecDeque<Token>) -> Box<Node> {
     let mut res = term(tokens);
-    while let Some(Token::Op(Operator::Mult)) = tokens.front_mut() {
+    while let Some(Token::Op(Operator::Mult)) = tokens.front() {
         tokens.pop_front();
         res = Box::new(Node::Expr(res, Operator::Mult, term(tokens)));
     }
@@ -65,7 +65,7 @@ fn expression_part2(tokens: &mut VecDeque<Token>) -> Box<Node> {
 
 fn term(tokens: &mut VecDeque<Token>) -> Box<Node> {
     let mut res = factor_part2(tokens);
-    while let Some(Token::Op(Operator::Plus)) = tokens.front_mut() {
+    while let Some(Token::Op(Operator::Plus)) = tokens.front() {
         tokens.pop_front();
         res = Box::new(Node::Expr(res, Operator::Plus, factor_part2(tokens)));
     }
