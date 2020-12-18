@@ -13,6 +13,7 @@ fn read_file() -> impl Iterator<Item = String> {
     BufReader::new(file).lines().map(|s| s.unwrap().to_string())
 }
 
+#[derive(Copy, Clone)]
 enum Operator {
     Plus,
     Mult,
@@ -38,52 +39,22 @@ fn tokenize(line: &str) -> Vec<Token> {
         .collect_vec()
 }
 
-// Part 1
-fn evaluate_part1(tokens: Vec<Token>) -> u64 {
-    let mut stack = VecDeque::new();
-    let mut inputs = VecDeque::from(tokens);
-
-    while let Some(t) = inputs.pop_front() {
-        let head = stack.pop_back();
-        match (t, head) {
-            (Token::Number(rhs), Some(Token::Op(op))) => {
-                if let Some(Token::Number(lhs)) = stack.pop_back() {
-                    let res = match op {
-                        Operator::Plus => lhs + rhs,
-                        Operator::Mult => lhs * rhs,
-                    };
-                    stack.push_back(Token::Number(res))
-                }
-            }
-            (Token::RightParen, Some(Token::Number(n))) => {
-                stack.pop_back();
-                inputs.push_front(Token::Number(n));
-            }
-            (n, Some(t)) => {
-                stack.push_back(t);
-                stack.push_back(n);
-            }
-            (n, None) => {
-                stack.push_back(n);
-            }
-        }
-    }
-
-    if let Some(Token::Number(n)) = stack.pop_back() {
-        n
-    } else {
-        panic!("Invalid expression")
-    }
-}
-
-// Part 2
-
 enum Node {
     Number(u64),
     Expr(Box<Node>, Operator, Box<Node>),
 }
 
-fn expression(tokens: &mut VecDeque<Token>) -> Box<Node> {
+fn expression_part1(tokens: &mut VecDeque<Token>) -> Box<Node> {
+    let mut res = factor_part1(tokens);
+    while let Some(Token::Op(op)) = tokens.front_mut() {
+        let op = op.clone();
+        tokens.pop_front();
+        res = Box::new(Node::Expr(res, op, factor_part1(tokens)));
+    }
+    res
+}
+
+fn expression_part2(tokens: &mut VecDeque<Token>) -> Box<Node> {
     let mut res = term(tokens);
     while let Some(Token::Op(Operator::Mult)) = tokens.front_mut() {
         tokens.pop_front();
@@ -93,19 +64,31 @@ fn expression(tokens: &mut VecDeque<Token>) -> Box<Node> {
 }
 
 fn term(tokens: &mut VecDeque<Token>) -> Box<Node> {
-    let mut res = factor(tokens);
+    let mut res = factor_part2(tokens);
     while let Some(Token::Op(Operator::Plus)) = tokens.front_mut() {
         tokens.pop_front();
-        res = Box::new(Node::Expr(res, Operator::Plus, factor(tokens)));
+        res = Box::new(Node::Expr(res, Operator::Plus, factor_part2(tokens)));
     }
     res
 }
 
-fn factor(tokens: &mut VecDeque<Token>) -> Box<Node> {
+fn factor_part1(tokens: &mut VecDeque<Token>) -> Box<Node> {
     match tokens.pop_front() {
         Some(Token::Number(n)) => Box::new(Node::Number(n)),
         Some(Token::LeftParen) => {
-            let res = expression(tokens);
+            let res = expression_part1(tokens);
+            tokens.pop_front();
+            res
+        }
+        _ => panic!("Bad expression"),
+    }
+}
+
+fn factor_part2(tokens: &mut VecDeque<Token>) -> Box<Node> {
+    match tokens.pop_front() {
+        Some(Token::Number(n)) => Box::new(Node::Number(n)),
+        Some(Token::LeftParen) => {
+            let res = expression_part2(tokens);
             tokens.pop_front();
             res
         }
@@ -121,9 +104,15 @@ fn evaluate_node(node: &Box<Node>) -> u64 {
     }
 }
 
+fn evaluate_part1(tokens: Vec<Token>) -> u64 {
+    let mut inputs = VecDeque::from(tokens);
+    let node = expression_part1(&mut inputs);
+    evaluate_node(&node)
+}
+
 fn evaluate_part2(tokens: Vec<Token>) -> u64 {
     let mut inputs = VecDeque::from(tokens);
-    let node = expression(&mut inputs);
+    let node = expression_part2(&mut inputs);
     evaluate_node(&node)
 }
 
