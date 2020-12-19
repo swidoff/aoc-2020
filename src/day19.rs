@@ -97,23 +97,16 @@ fn is_valid_for_rule(
             Some(m) if m == c => Some(char_index + 1),
             _ => None,
         },
-        Rule::SubRule(sub_rules) => {
-            let mut res = None;
-            for sub_rule in sub_rules {
-                let mut new_char_index = Some(char_index);
-                for sub_rule_index in sub_rule {
-                    new_char_index = match new_char_index {
-                        Some(i) => is_valid_for_rule(msg, rules, *sub_rule_index, i),
-                        None => break,
-                    };
-                }
-                if new_char_index.is_some() {
-                    res = new_char_index;
-                    break;
+        Rule::SubRule(sub_rules) => sub_rules.iter().find_map(|sub_rule| {
+            let mut new_char_index = Some(char_index);
+            for sub_rule_index in sub_rule {
+                new_char_index = match new_char_index {
+                    Some(i) => is_valid_for_rule(msg, rules, *sub_rule_index, i),
+                    None => break,
                 }
             }
-            res
-        }
+            new_char_index
+        }),
     };
     res
 }
