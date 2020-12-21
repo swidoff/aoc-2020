@@ -297,8 +297,8 @@ fn mask_match(tile: &Vec<Vec<char>>, r: usize, c: usize, mask: &Vec<Vec<char>>) 
 
 mod tests {
     use crate::day20::{
-        arrange_tiles, count_all_matches, find_sea_monsters, find_upper_left_corner, merge_tiles,
-        parse_tiles, read_file,
+        arrange_tiles, find_sea_monsters, find_upper_left_corner, merge_tiles, parse_tiles,
+        read_file,
     };
     use itertools::Itertools;
 
