@@ -1,11 +1,7 @@
-use itertools::Itertools;
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::HashMap;
 use std::fs::File;
-use std::hash::Hash;
 use std::io::prelude::*;
 use std::io::BufReader;
-use std::iter::FromIterator;
-use std::str::FromStr;
 
 fn read_file() -> impl Iterator<Item = String> {
     let file = File::open("input/day17.txt").unwrap();

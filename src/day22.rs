@@ -1,8 +1,5 @@
-use itertools::Itertools;
-use std::borrow::Borrow;
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{HashSet, VecDeque};
 use std::fs::File;
-use std::hash::Hash;
 use std::io::prelude::*;
 use std::io::BufReader;
 use std::iter::FromIterator;
@@ -31,7 +28,7 @@ fn parse_decks(iter: impl Iterator<Item = String>) -> (VecDeque<u64>, VecDeque<u
     (deck1, deck2)
 }
 
-fn combat<'a>(deck1: &'a mut VecDeque<u64>, deck2: &'a mut VecDeque<u64>) -> (usize, u64) {
+fn combat(deck1: &mut VecDeque<u64>, deck2: &mut VecDeque<u64>) -> (usize, u64) {
     while !deck1.is_empty() && !deck2.is_empty() {
         let card1 = deck1.pop_front().unwrap();
         let card2 = deck2.pop_front().unwrap();
@@ -63,10 +60,7 @@ fn calc_result(deck1: &VecDeque<u64>, deck2: &VecDeque<u64>) -> (usize, u64) {
     (winner, winning_score)
 }
 
-fn recursive_combat<'a>(
-    deck1: &'a mut VecDeque<u64>,
-    deck2: &'a mut VecDeque<u64>,
-) -> (usize, u64) {
+fn recursive_combat(deck1: &mut VecDeque<u64>, deck2: &mut VecDeque<u64>) -> (usize, u64) {
     let mut states = HashSet::new();
 
     while !deck1.is_empty() && !deck2.is_empty() {

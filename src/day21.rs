@@ -1,12 +1,9 @@
 use itertools::Itertools;
-use std::borrow::Borrow;
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{HashMap, HashSet};
 use std::fs::File;
-use std::hash::Hash;
 use std::io::prelude::*;
 use std::io::BufReader;
 use std::iter::FromIterator;
-use std::str::FromStr;
 
 fn read_file() -> impl Iterator<Item = String> {
     let file = File::open("input/day21.txt").unwrap();
@@ -71,7 +68,7 @@ fn find_unsafe_ingredients(foods: &Vec<Food>) -> HashMap<&String, &String> {
     loop {
         let singletons = allergens
             .iter()
-            .filter_map(|(allegen, ingredients)| {
+            .filter_map(|(_allergen, ingredients)| {
                 if ingredients.len() == 1 {
                     Some(*ingredients.iter().next().unwrap())
                 } else {
@@ -102,8 +99,8 @@ fn find_unsafe_ingredients(foods: &Vec<Food>) -> HashMap<&String, &String> {
 fn to_canonical_list(allergens: &HashMap<&String, &String>) -> String {
     allergens
         .iter()
-        .sorted_by_key(|(allergen, ingredient)| **allergen)
-        .map(|(allergen, ingredient)| *ingredient)
+        .sorted_by_key(|(allergen, _ingredient)| **allergen)
+        .map(|(_allergen, ingredient)| *ingredient)
         .join(",")
 }
 

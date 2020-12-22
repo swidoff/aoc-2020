@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::HashSet;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufReader;
@@ -156,7 +156,6 @@ fn assign_fields(notes: &Notes) -> Vec<&String> {
 #[cfg(test)]
 mod tests {
     use crate::day16::{assign_fields, parse_file, read_file, ticket_scanning_error_rate};
-    use itertools::Itertools;
 
     #[test]
     fn test_part1_example() {

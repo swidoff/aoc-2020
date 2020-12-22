@@ -1,8 +1,6 @@
 use itertools::Itertools;
-use std::borrow::Borrow;
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::HashMap;
 use std::fs::File;
-use std::hash::Hash;
 use std::io::prelude::*;
 use std::io::BufReader;
 use std::iter::FromIterator;
@@ -296,11 +294,7 @@ fn mask_match(tile: &Vec<Vec<char>>, r: usize, c: usize, mask: &Vec<Vec<char>>) 
 }
 
 mod tests {
-    use crate::day20::{
-        arrange_tiles, find_sea_monsters, find_upper_left_corner, merge_tiles, parse_tiles,
-        read_file,
-    };
-    use itertools::Itertools;
+    use crate::day20::{arrange_tiles, find_sea_monsters, merge_tiles, parse_tiles, read_file};
 
     const EXAMPLE: &str = "
 Tile 2311:
