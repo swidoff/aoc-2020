@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use std::collections::{HashMap, VecDeque};
+use std::collections::VecDeque;
 use std::iter::FromIterator;
 
 fn parse_input(input: &String) -> Vec<usize> {
@@ -59,47 +59,52 @@ fn play_cups(input: &Vec<usize>, moves: usize) -> String {
 
 /// Part 2
 
-struct NodeMap {
-    vec: Vec<usize>,
+/// Maps a cup value to the next cup value in the circular list.
+/// A value of 0 means the cup is temporarily out of the list.
+struct CupList {
+    next: Vec<usize>,
 }
 
-impl NodeMap {
-    fn new(input: &Vec<usize>) -> NodeMap {
-        let mut vec = vec![0; input.len() + 1];
+impl CupList {
+    fn new(input: &Vec<usize>) -> CupList {
+        let mut next = vec![0; input.len() + 1];
 
         for (i, v) in input.iter().enumerate() {
-            let next = input[(i + 1) % input.len()];
-            vec[*v] = next;
+            let next_cup = input[(i + 1) % input.len()];
+            next[*v] = next_cup;
         }
 
-        NodeMap { vec }
+        CupList { next }
     }
 
-    fn get_next(&self, v: usize) -> usize {
-        self.vec[v]
+    /// Returns the next cup in the list.
+    fn get_next(&self, cup: usize) -> usize {
+        self.next[cup]
     }
 
-    fn contains(&self, v: usize) -> bool {
-        self.vec[v] != 0
+    fn contains(&self, cup: usize) -> bool {
+        self.next[cup] != 0
     }
 
-    fn remove_next(&mut self, v: usize) -> usize {
-        let next_value = self.vec[v];
-        let new_next_value = self.vec[next_value];
-        self.vec[next_value] = 0;
-        self.vec[v] = new_next_value;
-        next_value
+    /// Removes the next cup after `cup` and returns its value.
+    fn remove_next(&mut self, cup: usize) -> usize {
+        let next_cup = self.next[cup];
+        let new_next_cup = self.next[next_cup];
+        self.next[next_cup] = 0;
+        self.next[cup] = new_next_cup;
+        next_cup
     }
 
-    fn insert_next(&mut self, at: usize, v: usize) {
-        let next_value = self.vec[at];
-        self.vec[v] = next_value;
-        self.vec[at] = v;
+    /// Inserts a `next_cup` into the list right after `cup.`
+    fn insert_next(&mut self, cup: usize, next_cup: usize) {
+        let next_value = self.next[cup];
+        self.next[next_cup] = next_value;
+        self.next[cup] = next_cup;
     }
 }
 
 fn play_cups_faster(input: &Vec<usize>, moves: usize) -> usize {
-    let mut node_map = NodeMap::new(input);
+    let mut node_map = CupList::new(input);
 
     let mut current_value = input[0];
     let mut q = VecDeque::with_capacity(3);
