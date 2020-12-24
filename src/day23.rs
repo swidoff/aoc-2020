@@ -59,7 +59,7 @@ fn play_cups(input: &Vec<usize>, moves: usize) -> String {
 
 /// Part 2
 fn play_cups_faster(input: &Vec<usize>, moves: usize) -> usize {
-    // For each cup, the vaue of the next cup in the circular list.
+    // For each cup, the value of the next cup in the circular list.
     // The value is zero if the cup as been removed from the list.
     let mut next = vec![0; input.len() + 1];
 
@@ -68,36 +68,36 @@ fn play_cups_faster(input: &Vec<usize>, moves: usize) -> usize {
         next[*v] = next_cup;
     }
 
-    let mut current_value = input[0];
+    let mut current_cup = input[0];
     let mut q = VecDeque::with_capacity(3);
     for _ in 0..moves {
-        // Remove the 3 cup after the current cups and push them to the q.
+        // Remove the 3 cups after the current cups and push them to the q.
         for _ in 1..4 {
-            let next_cup = next[current_value];
+            let next_cup = next[current_cup];
             let new_next_cup = next[next_cup];
             next[next_cup] = 0;
-            next[current_value] = new_next_cup;
+            next[current_cup] = new_next_cup;
             q.push_back(next_cup);
         }
 
-        // Find the next smallest value after current_value in the list, wrapping around if necessary.
-        let mut dest_value = current_value - 1;
-        while next[dest_value] == 0 {
-            if dest_value == 0 {
-                dest_value = input.len();
+        // Find the next smallest cup after current_value in the list, wrapping around if necessary.
+        let mut dest_cup = current_cup - 1;
+        while next[dest_cup] == 0 {
+            if dest_cup == 0 {
+                dest_cup = input.len();
             } else {
-                dest_value -= 1
+                dest_cup -= 1
             }
         }
 
-        // Insert the three cups in their original order right after the dest_value.
+        // Insert the three cups in their original order right after the dest_cup.
         while let Some(cup) = q.pop_back() {
-            let next_cup = next[dest_value];
-            next[dest_value] = cup;
+            let next_cup = next[dest_cup];
+            next[dest_cup] = cup;
             next[cup] = next_cup;
         }
 
-        current_value = next[current_value];
+        current_cup = next[current_cup];
     }
 
     let v1 = next[1];
