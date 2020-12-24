@@ -2,16 +2,16 @@ use itertools::Itertools;
 use std::collections::{HashMap, VecDeque};
 use std::iter::FromIterator;
 
-fn parse_input(input: &String) -> Vec<u64> {
+fn parse_input(input: &String) -> Vec<usize> {
     input
         .chars()
-        .map(|c| c.to_digit(10).unwrap() as u64)
+        .map(|c| c.to_digit(10).unwrap() as usize)
         .collect_vec()
 }
 
 /// Part 1
 
-fn play_cups(input: &Vec<u64>, moves: usize) -> String {
+fn play_cups(input: &Vec<usize>, moves: usize) -> String {
     let mut cups = Vec::from_iter(input.iter().map(|d| *d));
     let mut current_index = 0;
     let mut q = VecDeque::with_capacity(3);
@@ -29,7 +29,7 @@ fn play_cups(input: &Vec<u64>, moves: usize) -> String {
         let mut dest_value = current_value - 1;
         while !cups.contains(&dest_value) {
             if dest_value == 0 {
-                dest_value = input.len() as u64;
+                dest_value = input.len() as usize;
             } else {
                 dest_value -= 1
             }
@@ -59,65 +59,46 @@ fn play_cups(input: &Vec<u64>, moves: usize) -> String {
 
 /// Part 2
 
-struct Node {
-    value: u64,
-    next: u64,
-}
-
 struct NodeMap {
-    map: HashMap<u64, Node>,
+    vec: Vec<usize>,
 }
 
 impl NodeMap {
-    fn new(input: &Vec<u64>) -> NodeMap {
-        let mut map = HashMap::new();
+    fn new(input: &Vec<usize>) -> NodeMap {
+        let mut vec = vec![0; input.len() + 1];
 
         for (i, v) in input.iter().enumerate() {
-            let node = Node {
-                value: *v,
-                next: input[(i + 1) % input.len()],
-            };
-
-            map.insert(*v, node);
+            let next = input[(i + 1) % input.len()];
+            vec[*v] = next;
         }
 
-        NodeMap { map }
+        NodeMap { vec }
     }
 
-    fn get_next(&self, v: u64) -> u64 {
-        let current = self.map.get(&v).unwrap();
-        current.next
+    fn get_next(&self, v: usize) -> usize {
+        self.vec[v]
     }
 
-    fn remove_next(&mut self, v: u64) -> u64 {
-        let current = self.map.get(&v).unwrap();
-        let next_value = current.next;
+    fn contains(&self, v: usize) -> bool {
+        self.vec[v] != 0
+    }
 
-        let next = self.map.remove(&next_value).unwrap();
-        let new_next = self.map.get(&next.next).unwrap();
-        let new_next_value = new_next.value;
-
-        let mut current = self.map.get_mut(&v).unwrap();
-        current.next = new_next_value;
+    fn remove_next(&mut self, v: usize) -> usize {
+        let next_value = self.vec[v];
+        let new_next_value = self.vec[next_value];
+        self.vec[next_value] = 0;
+        self.vec[v] = new_next_value;
         next_value
     }
 
-    fn insert_next(&mut self, at: u64, v: u64) {
-        let mut current = self.map.get_mut(&at).unwrap();
-        let next_value = current.next;
-        current.next = v;
-
-        let next = self.map.get(&next_value).unwrap();
-
-        let node = Node {
-            value: v,
-            next: next.value,
-        };
-        self.map.insert(v, node);
+    fn insert_next(&mut self, at: usize, v: usize) {
+        let next_value = self.vec[at];
+        self.vec[v] = next_value;
+        self.vec[at] = v;
     }
 }
 
-fn play_cups_faster(input: &Vec<u64>, moves: usize) -> u64 {
+fn play_cups_faster(input: &Vec<usize>, moves: usize) -> usize {
     let mut node_map = NodeMap::new(input);
 
     let mut current_value = input[0];
@@ -128,9 +109,9 @@ fn play_cups_faster(input: &Vec<u64>, moves: usize) -> u64 {
         }
 
         let mut dest_value = current_value - 1;
-        while !node_map.map.contains_key(&dest_value) {
+        while !node_map.contains(dest_value) {
             if dest_value == 0 {
-                dest_value = input.len() as u64;
+                dest_value = input.len() as usize;
             } else {
                 dest_value -= 1
             }
@@ -148,8 +129,8 @@ fn play_cups_faster(input: &Vec<u64>, moves: usize) -> u64 {
     v1 * v2
 }
 
-fn add_cups(cups: &mut Vec<u64>, n: u64) {
-    for i in (cups.len() as u64)..n {
+fn add_cups(cups: &mut Vec<usize>, n: usize) {
+    for i in (cups.len() as usize)..n {
         cups.push(i + 1);
     }
 }
