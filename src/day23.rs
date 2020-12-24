@@ -1,19 +1,6 @@
 use itertools::Itertools;
-use std::borrow::BorrowMut;
-use std::collections::{HashMap, HashSet, VecDeque};
-use std::fs::File;
-use std::io::prelude::*;
-use std::io::BufReader;
+use std::collections::{HashMap, VecDeque};
 use std::iter::FromIterator;
-use std::rc::Rc;
-use std::str::FromStr;
-
-fn read_file() -> String {
-    let file = File::open("input/day22.txt").unwrap();
-    let mut res = String::new();
-    BufReader::new(file).read_to_string(&mut res);
-    res
-}
 
 fn parse_input(input: &String) -> Vec<u64> {
     input
@@ -75,7 +62,6 @@ fn play_cups(input: &Vec<u64>, moves: usize) -> String {
 struct Node {
     value: u64,
     next: u64,
-    prev: u64,
 }
 
 struct NodeMap {
@@ -85,17 +71,14 @@ struct NodeMap {
 impl NodeMap {
     fn new(input: &Vec<u64>) -> NodeMap {
         let mut map = HashMap::new();
-        let mut prev = input[input.len() - 1];
 
         for (i, v) in input.iter().enumerate() {
             let node = Node {
                 value: *v,
                 next: input[(i + 1) % input.len()],
-                prev,
             };
 
             map.insert(*v, node);
-            prev = *v;
         }
 
         NodeMap { map }
@@ -103,17 +86,16 @@ impl NodeMap {
 
     fn get_next(&self, v: u64) -> u64 {
         let current = self.map.get(&v).unwrap();
-        return current.next;
+        current.next
     }
 
     fn remove_next(&mut self, v: u64) -> u64 {
-        let current = self.map.get_mut(&v).unwrap();
+        let current = self.map.get(&v).unwrap();
         let next_value = current.next;
 
         let next = self.map.remove(&next_value).unwrap();
-        let mut new_next = self.map.get_mut(&next.next).unwrap();
+        let new_next = self.map.get(&next.next).unwrap();
         let new_next_value = new_next.value;
-        new_next.prev = v;
 
         let mut current = self.map.get_mut(&v).unwrap();
         current.next = new_next_value;
@@ -125,12 +107,10 @@ impl NodeMap {
         let next_value = current.next;
         current.next = v;
 
-        let mut next = self.map.get_mut(&next_value).unwrap();
-        next.prev = v;
+        let next = self.map.get(&next_value).unwrap();
 
         let node = Node {
             value: v,
-            prev: at,
             next: next.value,
         };
         self.map.insert(v, node);
